@@ -1,17 +1,18 @@
 #Importing the libraries
-import secret
-import openai
+import os
+#import secret
+#import openai
 import requests
 from time import sleep
-import os
 import wave
-import pygame
+#import pygame
 import random
-import soundfile as sf
+#import soundfile as sf
+from gpt4all import GPT4All
 
 #Setting up the API keys
-uberduck_auth = secret.uberduck_auth
-openai.api_key = secret.token
+#uberduck_auth = secret.uberduck_auth
+#openai.api_key = secret.token
 
 #Setting up the voice models from uberduck
 Spongebob = "2231cbd3-15a5-4571-9299-b58f36062c45"
@@ -21,6 +22,7 @@ Bart = "c924eb5e-d5b1-4916-96ea-ac6948cdbe86"
 
 #Setup of Chatgpt
 def chat_gen(script, content):
+    """
     reply = openai.ChatCompletion.create(
     model="gpt-3.5-turbo",
     messages=[
@@ -28,6 +30,13 @@ def chat_gen(script, content):
             {"role": "user", "content": content},
         ]
     )
+    """
+    gptj = GPT4All("ggml-mpt-7b-chat.bin")
+    messages=[
+            {"role": "system", "content": script},
+            {"role": "user", "content": content},
+        ]
+    reply = gptj.chat_completion(messages)
     return reply['choices'][0]['message']['content'] # type: ignore
 
 script = """
@@ -40,6 +49,9 @@ script = """
     Make sure the script is over 10 lines long, but under 15.
     Format is: person: "what they say" 
     Keep everything dumb and stupid.
+"""
+script = """
+    What is the definition for insanity
 """
 
 #Setup of the Voice Generator
@@ -115,8 +127,9 @@ def generete(prompt):
 
     #Splits the responce into lines
     lines = responce.split("\n")
-
+    
     #Goes through each line and checks if it is spongebob or patrick and then generates the audio file
+    """
     x = 0
     for line in lines:
         x += 1
@@ -131,8 +144,9 @@ def generete(prompt):
         else:
             print(line)
             print("Error: Line does not start with Spongebob or Patrick")
+    """
     #Merges the audio files
-    merge_wav_files([f"speech{i}.wav" for i in range(1, x + 1)], "output.wav")
+    #merge_wav_files([f"speech{i}.wav" for i in range(1, x + 1)], "output.wav")
 
     #Cleans up the audio files
     for filename in os.listdir(os.getcwd()):
@@ -153,11 +167,14 @@ prompts = [
     #"Homer, Bart, Talking about how they commited 9/11",
     #"Homer, Spongebob, Spongebob hunting childrens for living (he's hungry)",
     #"Homer, Bart, Talking about how they worked with walkter white to make meth",
-    "Spongebob, Patrick, Spongebob says undertale is gay",
-    "Spongebob, Patrick, Talking about having a massive orgy",
+    "Spongebob, Patrick, Spongebob says undertale the SANS?",
+    "Spongebob, Patrick, Talking about undertale the SANS",
 ]
 
 def run():
     cleanup()
     generete(prompts[random.randint(0, len(prompts) - 1)])
     print("Done")
+
+run()
+
