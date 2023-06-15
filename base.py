@@ -1,7 +1,7 @@
 #Importing the libraries
 import os
 #import secret
-#import openai
+#import openai 
 import requests
 from time import sleep
 import wave
@@ -15,6 +15,13 @@ from gpt4all import GPT4All
 #openai.api_key = secret.token
 
 #Setting up the voice models from uberduck
+characters = {
+    'Spongebob': "2231cbd3-15a5-4571-9299-b58f36062c45",
+    'Patrick' : "3b2755d1-11e2-4112-b75b-01c47560fb9c",
+    'Homer' : "f8c7d125-a240-47e3-94be-18bb58179a2a",
+    'Bart' : "c924eb5e-d5b1-4916-96ea-ac6948cdbe86"
+}
+
 Spongebob = "2231cbd3-15a5-4571-9299-b58f36062c45"
 Patrick = "3b2755d1-11e2-4112-b75b-01c47560fb9c"
 Homer = "f8c7d125-a240-47e3-94be-18bb58179a2a"
@@ -58,23 +65,25 @@ script = """
 def gen_voice(text, voice, pos,speeker):
     audio_uuid = requests.post(
         "https://api.uberduck.ai/speak",
-        json=dict(speech=text, voicemodel_uuid=voice),
-        auth=uberduck_auth,
-    ).json()["uuid"]
+        json=dict(speech=text, voicemodel_uuid=characters[voice]), # Change voicemodel_uuid to voice if any issues
+        auth=uberduck_auth,).json()["uuid"]
+    
     for t in range(50):
         sleep(1) # check status every second for 10 seconds.
         output = requests.get(
             "https://api.uberduck.ai/speak-status",
             params=dict(uuid=audio_uuid),
-            auth=uberduck_auth,
-        ).json()
+            auth=uberduck_auth,).json()
+        
         if output['path'] != None:
             r = requests.get(output["path"], allow_redirects=True)
             file_path = f"speech{pos}.wav"
+            
             with open(file_path, "wb") as f:
                 f.write(r.content)
             
             f = sf.SoundFile(f"speech{pos}.wav")
+            
             #append to script.txt
             with open("script.txt", "a") as d:
                 d.write(f'{speeker}:{text}:{(f.frames / f.samplerate)}\n')
@@ -129,7 +138,24 @@ def generete(prompt):
     lines = responce.split("\n")
     
     #Goes through each line and checks if it is spongebob or patrick and then generates the audio file
+    # checker from dictionary
+    '''x = 0
+    for line in lines:
+        x += 1
+        part = line.partition(': ')
+        chara = part[0]
+        length = len(chara)
+        try:
+            characters[chara]
+            gen_voice(part[2],chara, x ,chara)
+        except KeyError:
+            print(line)
+            print("Error: Line does not start with one of the following,")
+            for key in character.keys():
+                print(key)
+    '''
     """
+    # checker as if statment 
     x = 0
     for line in lines:
         x += 1
