@@ -31,7 +31,7 @@ def chat_gen(script, content):
         ]
     )
     """
-    gptj = GPT4All("ggml-mpt-7b-chat.bin")
+    gptj = GPT4All("ggml-gpt4all-j-v1.3-groovy")
     messages=[
             {"role": "system", "content": script},
             {"role": "user", "content": content},
